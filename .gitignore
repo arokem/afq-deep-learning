@@ -1,3 +1,7 @@
+# Results stored as pickles: 
+*.pickle
+# Azure ML backup files
+*.amltmp
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
