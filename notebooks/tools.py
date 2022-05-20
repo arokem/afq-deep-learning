@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from afqinsight.augmentation import jitter, time_warp, scaling, magnitude_warp, window_warp
 import tempfile
 
+
 def load_data():
     afq_dataset.drop_target_na()
 
@@ -16,7 +17,7 @@ def tf_aug(X_in, scaler=1/20):
         this_X = jitter(this_X, sigma=scale)
         this_X = scaling(this_X, sigma=scale)
         this_X = time_warp(this_X, sigma=scale)
-        this_X = window_warp(this_X)
+        this_X = window_warp(this_X, window_ratio=scale)
         X_out[..., channel] = this_X[0, ..., 0]
     return X_out
 
