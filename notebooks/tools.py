@@ -1,11 +1,30 @@
 import tensorflow as tf
 import numpy as np
 from sklearn.model_selection import train_test_split
+from afqinsight.datasets import AFQDataset
 from afqinsight.augmentation import jitter, time_warp, scaling, magnitude_warp, window_warp
 import tempfile
 
+
 def load_data():
+    afq_dataset = AFQDataset.from_files(
+    fn_nodes="../data/raw/combined_tract_profiles.csv",
+    fn_subjects="../data/raw/participants_updated_id.csv",
+    dwi_metrics=["dki_fa", "dki_md", "dki_mk"],
+    index_col="subject_id",
+    target_cols=["age", "dl_qc_score", "scan_site_id"],
+    label_encode_cols=["scan_site_id"]
+    )
     afq_dataset.drop_target_na()
+    full_dataset = list(afq_dataset.as_tensorflow_dataset().as_numpy_iterator())
+    X = np.concatenate([xx[0][None] for xx in full_dataset], 0)
+    y = np.array([yy[1][0] for yy in full_dataset])
+    qc = np.array([yy[1][1] for yy in full_dataset])
+    site = np.array([yy[1][2] for yy in full_dataset])
+    X = X[qc>0]
+    y = y[qc>0]
+    site = site[qc>0]
+    return X, y, site
 
 
 def tf_aug(X_in, scaler=1/20):
@@ -16,7 +35,7 @@ def tf_aug(X_in, scaler=1/20):
         this_X = jitter(this_X, sigma=scale)
         this_X = scaling(this_X, sigma=scale)
         this_X = time_warp(this_X, sigma=scale)
-        this_X = window_warp(this_X)
+        this_X = window_warp(this_X, window_ratio=scale)
         X_out[..., channel] = this_X[0, ..., 0]
     return X_out
 
@@ -26,7 +45,7 @@ def augment_this(X_in, y_in):
     return X_out, y_in
 
 
-def model_fit(model_func, X_train, y_train, lr, batch_size=128, n_epochs=1000):
+def model_fit(model_func, X_train, y_train, lr, batch_size=128, n_epochs=1000, augment=True):
     # Split into train and validation:
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2)
     
@@ -72,8 +91,9 @@ def model_fit(model_func, X_train, y_train, lr, batch_size=128, n_epochs=1000):
         patience=20,
         verbose=1)
     
-    callbacks = [early_stopping, ckpt, reduce_lr]        
-    train_dataset = train_dataset.map(augment_this) 
+    callbacks = [early_stopping, ckpt, reduce_lr]
+    if augment: 
+        train_dataset = train_dataset.map(augment_this) 
     train_dataset = train_dataset.batch(batch_size)
     val_dataset = val_dataset.batch(batch_size)
     history = model.fit(train_dataset, epochs=n_epochs, validation_data=val_dataset,
