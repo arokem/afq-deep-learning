@@ -45,7 +45,7 @@ def augment_this(X_in, y_in):
     return X_out, y_in
 
 
-def model_fit(model_func, X_train, y_train, lr, batch_size=128, n_epochs=1000, augment=True):
+def model_fit(model_func, X_train, y_train, lr, batch_size=128, n_epochs=1000, augment=None):
     # Split into train and validation:
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2)
     
@@ -92,8 +92,8 @@ def model_fit(model_func, X_train, y_train, lr, batch_size=128, n_epochs=1000, a
         verbose=1)
     
     callbacks = [early_stopping, ckpt, reduce_lr]
-    if augment: 
-        train_dataset = train_dataset.map(augment_this) 
+    if augment is not None: 
+        train_dataset = train_dataset.map(augment) 
     train_dataset = train_dataset.batch(batch_size)
     val_dataset = val_dataset.batch(batch_size)
     history = model.fit(train_dataset, epochs=n_epochs, validation_data=val_dataset,
