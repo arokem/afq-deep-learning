@@ -106,7 +106,7 @@ def model_fit(model_func, X_train, y_train, lr, batch_size=128, n_epochs=1000, a
     return model
 
 
-def fit_and_eval(model, X, y, site, model_dict, random_state, batch_size=128, n_epochs=1000, augment=None,                  train_size=None):
+def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=128, n_epochs=1000, augment=None,                  train_size=None):
     model_func = model_dict[model]["model"]
     lr = model_dict[model]["lr"]
     X_train, X_test, y_train, y_test, site_train, site_test = train_test_split(X, y, site, test_size=0.2,                                                                                  random_state=random_state)
