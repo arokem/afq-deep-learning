@@ -8,6 +8,7 @@ from sklearn.impute import SimpleImputer
 from neurocombat_sklearn import CombatModel
 from sklearn.metrics import r2_score, median_absolute_error, mean_absolute_error
 from sklearn.utils import shuffle, resample
+import pandas as pd
 
 
 def load_data():
