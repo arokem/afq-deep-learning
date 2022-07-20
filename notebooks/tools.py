@@ -4,6 +4,11 @@ from sklearn.model_selection import train_test_split
 from afqinsight.datasets import AFQDataset
 from afqinsight.augmentation import jitter, time_warp, scaling, magnitude_warp, window_warp
 import tempfile
+from sklearn.impute import SimpleImputer
+from neurocombat_sklearn import CombatModel
+from sklearn.metrics import r2_score, median_absolute_error, mean_absolute_error
+from sklearn.utils import shuffle, resample
+import pandas as pd
 
 
 def load_data():
@@ -45,7 +50,7 @@ def augment_this(X_in, y_in):
     return X_out, y_in
 
 
-def model_fit(model_func, X_train, y_train, lr, batch_size=128, n_epochs=1000, augment=None):
+def model_fit(model_func, X_train, y_train, lr, batch_size=32, n_epochs=1000, augment=None):
     # Split into train and validation:
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2)
     
@@ -100,3 +105,41 @@ def model_fit(model_func, X_train, y_train, lr, batch_size=128, n_epochs=1000, a
                         callbacks=callbacks, use_multiprocessing=True)
     model.load_weights(ckpt_filepath)
     return model
+
+
+def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32, n_epochs=1000, augment=None,
+                 train_size=None):
+    
+    model_func = model_dict[model]["model"]
+    lr = model_dict[model]["lr"]
+    X_train, X_test, y_train, y_test, site_train, site_test = train_test_split(X, y, site, test_size=0.2, random_state=random_state)
+    imputer = SimpleImputer(strategy="median")
+    # If train_size is set, select train_size subjects to be the training data:
+    if train_size is not None:
+        X_train, y_train, site_train = resample(X_train, y_train, site_train, replace=False, n_samples=train_size, random_state=random_state)
+    
+    # Impute train and test separately:
+    X_train = np.concatenate([imputer.fit_transform(X_train[..., ii])[:, :, None] for ii in range(X_train.shape[-1])], -1)
+    X_test = np.concatenate([imputer.fit_transform(X_test[..., ii])[:, :, None] for ii in range(X_test.shape[-1])], -1)
+    # Combat
+    X_train = np.concatenate([CombatModel().fit_transform(X_train[..., ii], site_train[:, None], None, None)[:, :, None] for ii in range(X_train.shape[-1])], -1)
+    X_test = np.concatenate([CombatModel().fit_transform(X_test[..., ii], site_test[:, None], None, None)[:, :, None] for ii in range(X_test.shape[-1])], -1)
+    
+    trained = model_fit(model_func, X_train, y_train, lr, 
+                        batch_size=batch_size, n_epochs=n_epochs)
+    metric = []
+    value = []
+    
+    y_pred = trained.predict(X_test)
+    metric.append("mae")
+    value.append(mean_absolute_error(y_test, y_pred))
+    metric.append("mad")
+    value.append(median_absolute_error(y_test, y_pred))
+    metric.append("r2")
+    value.append(r2_score(y_test, y_pred))
+    
+    result = {'Model': [model] * len(metric),
+              'Metric': metric,
+              'Value': value}
+    
+    return pd.DataFrame(result), pd.DataFrame(dict(y_pred=y_pred.squeeze(), y_test=y_test))
