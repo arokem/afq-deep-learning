@@ -50,7 +50,8 @@ def augment_this(X_in, y_in):
     return X_out, y_in
 
 
-def model_fit(model_func, X_train, y_train, lr, batch_size=32, n_epochs=1000, augment=None):
+def model_fit(model_func, X_train, y_train, lr, batch_size=32, n_epochs=1000, 
+              augment=None):
     # Split into train and validation:
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2)
     
@@ -107,8 +108,8 @@ def model_fit(model_func, X_train, y_train, lr, batch_size=32, n_epochs=1000, au
     return model
 
 
-def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32, n_epochs=1000, augment=None,
-                 train_size=None):
+def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32, 
+                 n_epochs=1000, augment=None, train_size=None):
     
     model_func = model_dict[model]["model"]
     lr = model_dict[model]["lr"]
@@ -126,7 +127,8 @@ def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32, n_e
     X_test = np.concatenate([CombatModel().fit_transform(X_test[..., ii], site_test[:, None], None, None)[:, :, None] for ii in range(X_test.shape[-1])], -1)
     
     trained = model_fit(model_func, X_train, y_train, lr, 
-                        batch_size=batch_size, n_epochs=n_epochs)
+                        batch_size=batch_size, n_epochs=n_epochs,
+                        augment=augment)
     metric = []
     value = []
     
