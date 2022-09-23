@@ -10,15 +10,17 @@ from sklearn.metrics import r2_score, median_absolute_error, mean_absolute_error
 from sklearn.utils import shuffle, resample
 import pandas as pd
 
+AUG_SCALING = None
+
 
 def load_data():
     afq_dataset = AFQDataset.from_files(
-    fn_nodes="../data/raw/combined_tract_profiles.csv",
-    fn_subjects="../data/raw/participants_updated_id.csv",
-    dwi_metrics=["dki_fa", "dki_md", "dki_mk"],
-    index_col="subject_id",
-    target_cols=["age", "dl_qc_score", "scan_site_id"],
-    label_encode_cols=["scan_site_id"]
+        fn_nodes="../data/raw/combined_tract_profiles.csv",
+        fn_subjects="../data/raw/participants_updated_id.csv",
+        dwi_metrics=["dki_fa", "dki_md", "dki_mk"],
+        index_col="subject_id",
+        target_cols=["age", "dl_qc_score", "scan_site_id"],
+        label_encode_cols=["scan_site_id"]
     )
     afq_dataset.drop_target_na()
     full_dataset = list(afq_dataset.as_tensorflow_dataset().as_numpy_iterator())
@@ -32,7 +34,9 @@ def load_data():
     return X, y, site
 
 
-def tf_aug(X_in, scaler=1/20):
+def tf_aug(X_in, scaler=AUG_SCALING):
+    if AUG_SCALING is None:
+        raise ValueError("Need to over-write the value of AUG_SCALER")
     X_out = np.zeros_like(X_in)
     for channel in range(X_in.shape[-1]):
         this_X = X_in[..., channel][np.newaxis, ..., np.newaxis]
@@ -46,7 +50,7 @@ def tf_aug(X_in, scaler=1/20):
 
 
 def augment_this(X_in, y_in):
-    X_out = tf.numpy_function(tf_aug, [X_in], tf.float32)    
+    X_out = tf.numpy_function(tf_aug, [X_in], tf.float32)
     return X_out, y_in
 
 
@@ -54,21 +58,21 @@ def model_fit(model_func, X_train, y_train, lr, batch_size=32, n_epochs=1000,
               augment=None):
     # Split into train and validation:
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2)
-    
+
     train_dataset = tf.data.Dataset.from_tensor_slices(
         (X_train.astype(np.float32), y_train.astype(np.float32)))
     val_dataset = tf.data.Dataset.from_tensor_slices(
         (X_val.astype(np.float32), y_val.astype(np.float32)))
 
-    model = model_func(input_shape=X_train.shape[1:], 
-                       n_classes=1, 
-                       output_activation=None, 
+    model = model_func(input_shape=X_train.shape[1:],
+                       n_classes=1,
+                       output_activation=None,
                        verbose=True)
-    
+
     model.compile(loss='mean_squared_error',
                   optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
-                  metrics=['mean_squared_error', 
-                           tf.keras.metrics.RootMeanSquaredError(name='rmse'), 
+                  metrics=['mean_squared_error',
+                           tf.keras.metrics.RootMeanSquaredError(name='rmse'),
                            'mean_absolute_error'],
                  )
 
@@ -96,10 +100,10 @@ def model_fit(model_func, X_train, y_train, lr, batch_size=32, n_epochs=1000,
         factor=0.5,
         patience=20,
         verbose=1)
-    
+
     callbacks = [early_stopping, ckpt, reduce_lr]
-    if augment is not None: 
-        train_dataset = train_dataset.map(augment) 
+    if augment is not None:
+        train_dataset = train_dataset.map(augment)
     train_dataset = train_dataset.batch(batch_size)
     val_dataset = val_dataset.batch(batch_size)
     history = model.fit(train_dataset, epochs=n_epochs, validation_data=val_dataset,
