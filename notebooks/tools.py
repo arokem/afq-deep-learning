@@ -10,7 +10,7 @@ from sklearn.metrics import r2_score, median_absolute_error, mean_absolute_error
 from sklearn.utils import shuffle, resample
 import pandas as pd
 
-AUG_SCALING = None
+AUG_SCALING = 1/20
 
 
 def load_data():
@@ -117,11 +117,11 @@ def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32,
     
     model_func = model_dict[model]["model"]
     lr = model_dict[model]["lr"]
-    X_train, X_test, y_train, y_test, site_train, site_test = train_test_split(X, y, site, test_size=0.2, random_state=random_state)
+    X_train, X_test, y_train, y_test, site_train, site_test = train_test_split(X, y, site,             test_size=0.2, random_state=random_state)
     imputer = SimpleImputer(strategy="median")
     # If train_size is set, select train_size subjects to be the training data:
     if train_size is not None:
-        X_train, y_train, site_train = resample(X_train, y_train, site_train, replace=False, n_samples=train_size, random_state=random_state)
+        X_train, y_train, site_train = resample(X_train, y_train, site_train, replace=False,               n_samples=train_size, random_state=random_state)
     
     # Impute train and test separately:
     X_train = np.concatenate([imputer.fit_transform(X_train[..., ii])[:, :, None] for ii in range(X_train.shape[-1])], -1)
