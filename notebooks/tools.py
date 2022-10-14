@@ -10,7 +10,8 @@ from sklearn.metrics import r2_score, median_absolute_error, mean_absolute_error
 from sklearn.utils import shuffle, resample
 import pandas as pd
 
-AUG_SCALING = 1/5
+AUG_SCALING = 1/10
+
 
 
 def load_data():
