@@ -13,7 +13,6 @@ import pandas as pd
 AUG_SCALING = 1/10
 
 
-
 def load_data():
     afq_dataset = AFQDataset.from_files(
         fn_nodes="../data/raw/combined_tract_profiles.csv",
