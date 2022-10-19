@@ -33,14 +33,14 @@ X, y, site = load_data()
 
 
 model_dict = {
-#   "cnn_lenet": {"model": cnn_lenet, "lr": 0.001}, 
+  "cnn_lenet": {"model": cnn_lenet, "lr": 0.001}, 
   # "mlp4": {"model": mlp4, "lr": 0.001},
   # "cnn_vgg": {"model": cnn_vgg, "lr": 0.001},
   # "lstm1v0": {"model": lstm1v0, "lr": 0.01},
   # "lstm1": {"model": lstm1, "lr": 0.01},
   # "lstm2": {"model": lstm2, "lr": 0.01},
   # "blstm1": {"model": blstm1, "lr": 0.01},
-  "blstm2": {"model": blstm2, "lr": 0.01},
+  # "blstm2": {"model": blstm2, "lr": 0.01},
   # "lstm_fcn": {"model": lstm_fcn, "lr": 0.01},
   # "cnn_resnet": {"model": cnn_resnet, "lr": 0.01}
              }
@@ -95,10 +95,10 @@ for model in model_dict:
         dfs_pred.append(this_pred)
         # Save evaluation metrics
         one_df = pd.concat(dfs_eval)
-        one_df.to_csv("blstm2_aug5_1_eval.csv")
+        one_df.to_csv("lenet_aug10_1_eval.csv")
         # Save predictions and test values:
         one_df = pd.concat(dfs_pred)
-        one_df.to_csv("blstm2_aug5_1_pred.csv")
+        one_df.to_csv("lenet_aug10_1_pred.csv")
 
 
 # In[ ]:
@@ -126,10 +126,10 @@ for model in model_dict:
         dfs_pred.append(this_pred)
         # Save evaluation metrics
         one_df = pd.concat(dfs_eval)
-        one_df.to_csv("blstm2_aug5_2_eval.csv")
+        one_df.to_csv("lenet_aug10_2_eval.csv")
         # Save predictions and test values:
         one_df = pd.concat(dfs_pred)
-        one_df.to_csv("blstm2_aug5_2_pred.csv")
+        one_df.to_csv("lenet_aug10_2_pred.csv")
 
 
 # In[ ]:
@@ -157,10 +157,10 @@ for model in model_dict:
         dfs_pred.append(this_pred)
         # Save evaluation metrics
         one_df = pd.concat(dfs_eval)
-        one_df.to_csv("blstm2_aug5_3_eval.csv")
+        one_df.to_csv("lenet_aug10_3_eval.csv")
         # Save predictions and test values:
         one_df = pd.concat(dfs_pred)
-        one_df.to_csv("blstm2_aug5_3_pred.csv")
+        one_df.to_csv("lenet_aug10_3_pred.csv")
 
 
 # In[ ]:
@@ -188,10 +188,10 @@ for model in model_dict:
         dfs_pred.append(this_pred)
         # Save evaluation metrics
         one_df = pd.concat(dfs_eval)
-        one_df.to_csv("blstm2_aug5_4_eval.csv")
+        one_df.to_csv("lenet_aug10_4_eval.csv")
         # Save predictions and test values:
         one_df = pd.concat(dfs_pred)
-        one_df.to_csv("blstm2_aug5_4_pred.csv")
+        one_df.to_csv("lenet_aug10_4_pred.csv")
 
 
 # In[ ]:
@@ -219,10 +219,10 @@ for model in model_dict:
         dfs_pred.append(this_pred)
         # Save evaluation metrics
         one_df = pd.concat(dfs_eval)
-        one_df.to_csv("blstm2_aug5_5_eval.csv")
+        one_df.to_csv("lenet_aug10_5_eval.csv")
         # Save predictions and test values:
         one_df = pd.concat(dfs_pred)
-        one_df.to_csv("blstm2_aug5_5_pred.csv")
+        one_df.to_csv("lenet_aug10_5_pred.csv")
 
 
 # In[ ]:
@@ -250,10 +250,10 @@ for model in model_dict:
         dfs_pred.append(this_pred)
         # Save evaluation metrics
         one_df = pd.concat(dfs_eval)
-        one_df.to_csv("blstm2_aug5_6_eval.csv")
+        one_df.to_csv("lenet_aug10_6_eval.csv")
         # Save predictions and test values:
         one_df = pd.concat(dfs_pred)
-        one_df.to_csv("blstm2_aug5_6_pred.csv")
+        one_df.to_csv("lenet_aug10_6_pred.csv")
 
 
 # In[ ]:
