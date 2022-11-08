@@ -13,6 +13,23 @@ import pandas as pd
 AUG_SCALING = 1/10
 
 
+def load_data_notf():
+    afq_dataset = AFQDataset.from_files(
+        fn_nodes="../data/raw/combined_tract_profiles.csv",
+        fn_subjects="../data/raw/participants_updated_id.csv",
+        dwi_metrics=["dki_fa", "dki_md", "dki_mk"],
+        index_col="subject_id",
+        target_cols=["age", "dl_qc_score", "scan_site_id"],
+        label_encode_cols=["scan_site_id"]
+    )
+    afq_dataset.drop_target_na()
+    qc = afq_dataset.y[:, 1]
+    y = afq_dataset.y[:, 0][qc>0]
+    site = afq_dataset.y[:, 2][qc>0]
+    X = afq_dataset.X[qc>0]    
+    return X, y, site
+
+
 def load_data():
     afq_dataset = AFQDataset.from_files(
         fn_nodes="../data/raw/combined_tract_profiles.csv",
@@ -117,11 +134,11 @@ def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32,
     
     model_func = model_dict[model]["model"]
     lr = model_dict[model]["lr"]
-    X_train, X_test, y_train, y_test, site_train, site_test = train_test_split(X, y, site,             test_size=0.2, random_state=random_state)
+    X_train, X_test, y_train, y_test, site_train, site_test = train_test_split(X, y, site, test_size=0.2, random_state=random_state)
     imputer = SimpleImputer(strategy="median")
     # If train_size is set, select train_size subjects to be the training data:
     if train_size is not None:
-        X_train, y_train, site_train = resample(X_train, y_train, site_train, replace=False,               n_samples=train_size, random_state=random_state)
+        X_train, y_train, site_train = resample(X_train, y_train, site_train, replace=False, n_samples=train_size, random_state=random_state)
     
     # Impute train and test separately:
     X_train = np.concatenate([imputer.fit_transform(X_train[..., ii])[:, :, None] for ii in range(X_train.shape[-1])], -1)
@@ -149,3 +166,51 @@ def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32,
               'Value': value}
     
     return pd.DataFrame(result), pd.DataFrame(dict(y_pred=y_pred.squeeze(), y_test=y_test))
+
+
+
+
+def fit_and_eval_notf(model, X, y, site, random_state, train_size=None):
+    
+    X_train, X_test, y_train, y_test, site_train, site_test = train_test_split(
+        X, y, site, test_size=0.2, random_state=random_state)
+    imputer = SimpleImputer(strategy="median")
+    # If train_size is set, select train_size subjects to be the training data:
+    if train_size is not None:
+        X_train, y_train, site_train = resample(X_train, y_train, site_train, 
+                                                replace=False, 
+                                                n_samples=train_size, 
+                                                random_state=random_state)
+    
+    # Impute train and test separately:
+    X_train = imputer.fit_transform(X_train)
+    X_test = imputer.fit_transform(X_test)
+    # Combat
+    X_train = CombatModel().fit_transform(X_train, site_train.reshape(-1, 1))
+    X_test = CombatModel().fit_transform(X_test, site_test.reshape(-1, 1))
+    
+    trained = model.fit(X_train, y_train)
+    metric = []
+    value = []
+    
+    y_pred = trained.predict(X_test)
+    metric.append("mae")
+    value.append(mean_absolute_error(y_test, y_pred))
+    metric.append("mad")
+    value.append(median_absolute_error(y_test, y_pred))
+    metric.append("r2")
+    value.append(r2_score(y_test, y_pred))
+    
+    result = {'Model': [model] * len(metric),
+              'Metric': metric,
+              'Value': value}
+    
+    return pd.DataFrame(result), pd.DataFrame(dict(y_pred=y_pred.squeeze(), y_test=y_test))
+
+
+
+def learning_curve(x, max_acc, min_acc, k):
+    """ 
+    A model of change in R2 as a function of sample size
+    """
+    return max_r2 - (max_r2 - min_r2) * np.exp(-1 * (x - np.min(x)) / k)
