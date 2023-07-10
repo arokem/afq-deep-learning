@@ -1,4 +1,9 @@
+import os
 import os.path as op
+import s3fs
+from tempfile import mkdtemp
+import glob
+from datetime import datetime
 
 import tensorflow as tf
 import numpy as np
@@ -248,6 +253,14 @@ train_sizes = [100, 175, 350, 700, 1000, None]
 
 @pydra.mark.task
 def train_cnn_on_hyak(model, run, train_size=None, metric=None):
+
+    # Create local filesystem:
+    bids_path = op.join("/gscratch/escience/arokem/pyafq_data/", f"bids_sub-{subject}")
+    os.makedirs(bids_path, exist_ok=True)
+    print(f"BIDS path is {bids_path}")
+    qsiprep_path = op.join(bids_path, "derivatives/qsiprep/")
+
+    
     X, y, site = load_data()
     if metric is not None:
         X = X[:, :, metric_to_slice[metric]]
@@ -275,6 +288,19 @@ def train_cnn_on_hyak(model, run, train_size=None, metric=None):
     eval.to_csv(f"/{model}_run-{run}_train-{train_size}_metric-{metric}_eval.csv")
     pred.to_csv(f".../{model}_run-{run}_train-{train_size}_metric-{metric}_pred.csv")
 
+if __name__ == "__main__": 
 
-    
+    scratch_dir = "/gscratch/escience/arokem/"
+    scratch_dir_tmp = op.join(scratch_dir, "tmp_")
+    cache_dir_tmp = mkdtemp(prefix=scratch_dir_tmp)
+    today = datetime.today().strftime('%Y-%m-%d')
+    today = "2023-03-21"
+    t = train_cnn_on_hyak(model=list(model_dict.keys()), 
+                          run=list(range(10)), 
+                          train_size=train_sizes, 
+                          cache_dir=cache_dir_tmp).split(["model", "run", "train_size"])
+
+    with pydra.Submitter(plugin="slurm",
+            sbatch_args="-J afqdl -p gpu-a40 -A escience --mem=58G --time=18:00:00 -o /gscratch/escience/arokem/logs/afqdl.out -e /gscratch/escience/arokem/logs/afqdl.err --mail-user=arokem@uw.edu --mail-type=ALL --partition=gpu-a40") as sub:
+    sub(runnable=t)
     
