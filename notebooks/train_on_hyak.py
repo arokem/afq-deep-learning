@@ -41,7 +41,7 @@ def load_data_notf():
     qc = afq_dataset.y[:, 1]
     y = afq_dataset.y[:, 0][qc>0]
     site = afq_dataset.y[:, 2][qc>0]
-    X = afq_dataset.X[qc>0]    
+    X = afq_dataset.X[qc>0]
     return X, y, site
 
 
@@ -86,7 +86,7 @@ def augment_this(X_in, y_in):
     return X_out, y_in
 
 
-def model_fit(model_func, X_train, y_train, lr, batch_size=32, n_epochs=1000, 
+def model_fit(model_func, X_train, y_train, lr, batch_size=32, n_epochs=1000,
               augment=None):
     # Split into train and validation:
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2)
@@ -144,9 +144,9 @@ def model_fit(model_func, X_train, y_train, lr, batch_size=32, n_epochs=1000,
     return model
 
 
-def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32, 
+def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32,
                  n_epochs=1000, augment=None, train_size=None):
-    
+
     model_func = model_dict[model]["model"]
     lr = model_dict[model]["lr"]
     X_train, X_test, y_train, y_test, site_train, site_test = train_test_split(X, y, site, test_size=0.2, random_state=random_state)
@@ -154,20 +154,20 @@ def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32,
     # If train_size is set, select train_size subjects to be the training data:
     if train_size is not None:
         X_train, y_train, site_train = resample(X_train, y_train, site_train, replace=False, n_samples=train_size, random_state=random_state)
-    
+
     # Impute train and test separately:
     X_train = np.concatenate([imputer.fit_transform(X_train[..., ii])[:, :, None] for ii in range(X_train.shape[-1])], -1)
     X_test = np.concatenate([imputer.fit_transform(X_test[..., ii])[:, :, None] for ii in range(X_test.shape[-1])], -1)
     # Combat
     X_train = np.concatenate([CombatModel().fit_transform(X_train[..., ii], site_train[:, None], None, None)[:, :, None] for ii in range(X_train.shape[-1])], -1)
     X_test = np.concatenate([CombatModel().fit_transform(X_test[..., ii], site_test[:, None], None, None)[:, :, None] for ii in range(X_test.shape[-1])], -1)
-    
-    trained = model_fit(model_func, X_train, y_train, lr, 
+
+    trained = model_fit(model_func, X_train, y_train, lr,
                         batch_size=batch_size, n_epochs=n_epochs,
                         augment=augment)
     metric = []
     value = []
-    
+
     y_pred = trained.predict(X_test)
     metric.append("mae")
     value.append(mean_absolute_error(y_test, y_pred))
@@ -175,39 +175,39 @@ def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32,
     value.append(median_absolute_error(y_test, y_pred))
     metric.append("r2")
     value.append(r2_score(y_test, y_pred))
-    
+
     result = {'Model': [model] * len(metric),
               'Metric': metric,
               'Value': value}
-    
+
     return pd.DataFrame(result), pd.DataFrame(dict(y_pred=y_pred.squeeze(), y_test=y_test))
 
 
 
 
 def fit_and_eval_notf(model, X, y, site, random_state, train_size=None):
-    
+
     X_train, X_test, y_train, y_test, site_train, site_test = train_test_split(
         X, y, site, test_size=0.2, random_state=random_state)
     imputer = SimpleImputer(strategy="median")
     # If train_size is set, select train_size subjects to be the training data:
     if train_size is not None:
-        X_train, y_train, site_train = resample(X_train, y_train, site_train, 
-                                                replace=False, 
-                                                n_samples=train_size, 
+        X_train, y_train, site_train = resample(X_train, y_train, site_train,
+                                                replace=False,
+                                                n_samples=train_size,
                                                 random_state=random_state)
-    
+
     # Impute train and test separately:
     X_train = imputer.fit_transform(X_train)
     X_test = imputer.fit_transform(X_test)
     # Combat
     X_train = CombatModel().fit_transform(X_train, site_train.reshape(-1, 1))
     X_test = CombatModel().fit_transform(X_test, site_test.reshape(-1, 1))
-    
+
     trained = model.fit(X_train, y_train)
     metric = []
     value = []
-    
+
     y_pred = trained.predict(X_test)
     metric.append("mae")
     value.append(mean_absolute_error(y_test, y_pred))
@@ -215,23 +215,23 @@ def fit_and_eval_notf(model, X, y, site, random_state, train_size=None):
     value.append(median_absolute_error(y_test, y_pred))
     metric.append("r2")
     value.append(r2_score(y_test, y_pred))
-    
+
     result = {'Model': [model] * len(metric),
               'Metric': metric,
               'Value': value}
-    
+
     return pd.DataFrame(result), pd.DataFrame(dict(y_pred=y_pred.squeeze(), y_test=y_test))
 
 
 def learning_curve(x, max_acc, min_acc, k):
-    """ 
+    """
     A model of change in R2 as a function of sample size
     """
     return max_r2 - (max_r2 - min_r2) * np.exp(-1 * (x - np.min(x)) / k)
 
 
 model_dict = {
-  "cnn_lenet": {"model": cnn_lenet, "lr": 0.001}, 
+  "cnn_lenet": {"model": cnn_lenet, "lr": 0.001},
   "mlp4": {"model": mlp4, "lr": 0.001},
   "cnn_vgg": {"model": cnn_vgg, "lr": 0.001},
   "lstm1v0": {"model": lstm1v0, "lr": 0.01},
@@ -243,8 +243,8 @@ model_dict = {
   "cnn_resnet": {"model": cnn_resnet, "lr": 0.01}
              }
 
-metric_to_slice = {"fa": slice(0, 24), 
-                   "md": slice(24, 48), 
+metric_to_slice = {"fa": slice(0, 24),
+                   "md": slice(24, 48),
                    "mk": slice(48, 72)}
 
 seeds = np.array([484, 645, 714, 244, 215, 1503, 1334, 1576, 469, 1795])
@@ -260,7 +260,7 @@ def train_cnn_on_hyak(model, run, train_size=None, metric=None):
     print(f"BIDS path is {bids_path}")
     qsiprep_path = op.join(bids_path, "derivatives/qsiprep/")
 
-    
+
     X, y, site = load_data()
     if metric is not None:
         X = X[:, :, metric_to_slice[metric]]
@@ -268,39 +268,44 @@ def train_cnn_on_hyak(model, run, train_size=None, metric=None):
     seed = seeds[run]
 
     eval, pred = fit_and_eval(
-        model, 
+        model,
         model_dict,
-        X, 
-        y, 
+        X,
+        y,
         site,
         random_state=seed,
         train_size=train_size)
-    
+
     eval["run"] = run
     pred["run"] = run
 
-    if train_size is None: 
+    if train_size is None:
         train_size = "all"
 
-    if metric is None: 
+    if metric is None:
         metric = "all"
 
     eval.to_csv(f"/{model}_run-{run}_train-{train_size}_metric-{metric}_eval.csv")
     pred.to_csv(f".../{model}_run-{run}_train-{train_size}_metric-{metric}_pred.csv")
 
-if __name__ == "__main__": 
+sbatch_args = "-J afqdl -p gpu-a40 -A escience --mem=58G --time=18:00:00 -o /gscratch/escience/arokem/logs/afqdl.out -e /gscratch/escience/arokem/logs/afqdl.err --mail-user=arokem@uw.edu --mail-type=ALL --partition=gpu-a40"
+if __name__ == "__main__":
 
     scratch_dir = "/gscratch/escience/arokem/"
     scratch_dir_tmp = op.join(scratch_dir, "tmp_")
     cache_dir_tmp = mkdtemp(prefix=scratch_dir_tmp)
     today = datetime.today().strftime('%Y-%m-%d')
     today = "2023-03-21"
-    t = train_cnn_on_hyak(model=list(model_dict.keys()), 
-                          run=list(range(10)), 
-                          train_size=train_sizes, 
-                          cache_dir=cache_dir_tmp).split(["model", "run", "train_size"])
+    for model in list(model_dict.keys()):
+        for run in range(10):
+            for train_size in train_sizes:
+                task = train_cnn_on_hyak(
+                    model=model,
+                    run=run,
+                    train_size=train_size,
+                    cache_dir=cache_dir_tmp)
 
-    with pydra.Submitter(plugin="slurm",
-            sbatch_args="-J afqdl -p gpu-a40 -A escience --mem=58G --time=18:00:00 -o /gscratch/escience/arokem/logs/afqdl.out -e /gscratch/escience/arokem/logs/afqdl.err --mail-user=arokem@uw.edu --mail-type=ALL --partition=gpu-a40") as sub:
-    sub(runnable=t)
-    
+                with pydra.Submitter(
+                    plugin="slurm",
+                    sbatch_args=sbatch_args) as sub:
+                        sub(runnable=task)
