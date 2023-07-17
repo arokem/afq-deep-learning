@@ -15,7 +15,7 @@ beautifulsoup4==4.11.1
 bleach==5.0.1
 blosc2==2.0.0
 cachetools==5.2.1
-certifi @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_5d968ni_yn/croot/certifi_1671487774636/work/certifi
+certifi
 cffi==1.15.1
 charset-normalizer==3.0.1
 comm==0.1.2
@@ -38,8 +38,8 @@ google-auth==2.16.0
 google-auth-oauthlib==0.4.6
 google-pasta==0.2.0
 groupyr==0.2.7
-grpcio @ file:///Users/ktietz/ci_310/grpcio_1643970354199/work
-h5py @ file:///Users/ktietz/ci_310/h5py_1644262287129/work
+grpcio
+h5py
 idna==3.4
 ipykernel==6.20.1
 ipython==8.8.0
