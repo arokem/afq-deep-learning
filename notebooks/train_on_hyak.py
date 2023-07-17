@@ -1,6 +1,5 @@
 import os
 import os.path as op
-import s3fs
 from tempfile import mkdtemp
 import glob
 from datetime import datetime
