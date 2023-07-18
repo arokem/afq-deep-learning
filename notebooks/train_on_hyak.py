@@ -254,10 +254,9 @@ train_sizes = [100, 175, 350, 700, 1000, None]
 def train_cnn_on_hyak(model, run, train_size=None, metric=None):
 
     # Create local filesystem:
-    bids_path = op.join("/gscratch/escience/arokem/pyafq_data/", f"bids_sub-{subject}")
-    os.makedirs(bids_path, exist_ok=True)
-    print(f"BIDS path is {bids_path}")
-    qsiprep_path = op.join(bids_path, "derivatives/qsiprep/")
+    out_path = op.join("/gscratch/escience/arokem/afqdl-data/")
+    os.makedirs(out_path, exist_ok=True)
+    print(f"Output path is {out_path}")
 
 
     X, y, site = load_data()
@@ -284,8 +283,8 @@ def train_cnn_on_hyak(model, run, train_size=None, metric=None):
     if metric is None:
         metric = "all"
 
-    eval.to_csv(f"/{model}_run-{run}_train-{train_size}_metric-{metric}_eval.csv")
-    pred.to_csv(f".../{model}_run-{run}_train-{train_size}_metric-{metric}_pred.csv")
+    eval.to_csv(f"{out_path}/{model}_run-{run}_train-{train_size}_metric-{metric}_eval.csv")
+    pred.to_csv(f"{out_path}/{model}_run-{run}_train-{train_size}_metric-{metric}_pred.csv")
 
 sbatch_args = "-J afqdl -p gpu-a40 -A escience --mem=58G --time=18:00:00 -o /gscratch/escience/arokem/logs/afqdl.out -e /gscratch/escience/arokem/logs/afqdl.err --mail-user=arokem@uw.edu --mail-type=ALL --partition=gpu-a40"
 if __name__ == "__main__":
