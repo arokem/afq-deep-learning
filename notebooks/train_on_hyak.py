@@ -30,7 +30,7 @@ data_path = "/gscratch/escience/arokem/hbn/"
 def load_data_notf():
     afq_dataset = AFQDataset.from_files(
         fn_nodes=f"{data_path}combined_tract_profiles.csv",
-        fn_subjects=f"{data_path}raw/participants_updated_id.csv",
+        fn_subjects=f"{data_path}participants_updated_id.csv",
         dwi_metrics=["dki_fa", "dki_md", "dki_mk"],
         index_col="subject_id",
         target_cols=["age", "dl_qc_score", "scan_site_id"],
@@ -47,7 +47,7 @@ def load_data_notf():
 def load_data():
     afq_dataset = AFQDataset.from_files(
         fn_nodes=f"{data_path}combined_tract_profiles.csv",
-        fn_subjects=f"{data_path}raw/participants_updated_id.csv",
+        fn_subjects=f"{data_path}participants_updated_id.csv",
         dwi_metrics=["dki_fa", "dki_md", "dki_mk"],
         index_col="subject_id",
         target_cols=["age", "dl_qc_score", "scan_site_id"],
