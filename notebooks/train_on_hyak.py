@@ -298,7 +298,7 @@ def train_cnn_on_hyak(model, run, train_size=None, metric=None):
     eval.to_csv(f"{out_path}/{model}_run-{run}_train-{train_size}_metric-{metric}_eval.csv")
     pred.to_csv(f"{out_path}/{model}_run-{run}_train-{train_size}_metric-{metric}_pred.csv")
 
-sbatch_args = "-J afqdl -p gpu-a40 -A escience --mem=58G --time=18:00:00 -o /gscratch/scrubbed/arokem/logs/afqdl.out -e /gscratch/scrubbed/arokem/logs/afqdl.err --mail-user=arokem@uw.edu --mail-type=ALL --partition=gpu-a40"
+sbatch_args = "-J afqdl -p gpu-a40 -A escience --mem=58G --time=18:00:00 -o /gscratch/scrubbed/arokem/logs/afqdl.out -e /gscratch/scrubbed/arokem/logs/afqdl.err --mail-user=arokem@uw.edu --mail-type=ALL --partition=gpu-a40 --gpus=1"
 if __name__ == "__main__":
 
     scratch_dir = "/gscratch/scrubbed/arokem/"
