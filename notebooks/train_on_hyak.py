@@ -229,29 +229,17 @@ def learning_curve(x, max_acc, min_acc, k):
     return max_r2 - (max_r2 - min_r2) * np.exp(-1 * (x - np.min(x)) / k)
 
 
-# model_dict = {
-#   "cnn_lenet": {"model": cnn_lenet, "lr": 0.001},
-#   "mlp4": {"model": mlp4, "lr": 0.001},
-#   "cnn_vgg": {"model": cnn_vgg, "lr": 0.001},
-#   "lstm1v0": {"model": lstm1v0, "lr": 0.01},
-#   "lstm1": {"model": lstm1, "lr": 0.01},
-#   "lstm2": {"model": lstm2, "lr": 0.01},
-#   "blstm1": {"model": blstm1, "lr": 0.01},
-#   "blstm2": {"model": blstm1, "lr": 0.01},
-#   "lstm_fcn": {"model": lstm_fcn, "lr": 0.01},
-#   "cnn_resnet": {"model": cnn_resnet, "lr": 0.01}
-#              }
-
-# metric_to_slice = {"fa": slice(0, 24),
-#                    "md": slice(24, 48),
-#                    "mk": slice(48, 72)}
-
-# seeds = np.array([484, 645, 714, 244, 215, 1503, 1334, 1576, 469, 1795])
-
-# train_sizes = [100, 175, 350, 700, 1000, None]
-
 model_dict = {
   "cnn_lenet": {"model": cnn_lenet, "lr": 0.001},
+  "mlp4": {"model": mlp4, "lr": 0.001},
+  "cnn_vgg": {"model": cnn_vgg, "lr": 0.001},
+  "lstm1v0": {"model": lstm1v0, "lr": 0.01},
+  "lstm1": {"model": lstm1, "lr": 0.01},
+  "lstm2": {"model": lstm2, "lr": 0.01},
+  "blstm1": {"model": blstm1, "lr": 0.01},
+  "blstm2": {"model": blstm1, "lr": 0.01},
+  "lstm_fcn": {"model": lstm_fcn, "lr": 0.01},
+  "cnn_resnet": {"model": cnn_resnet, "lr": 0.01}
              }
 
 metric_to_slice = {"fa": slice(0, 24),
@@ -261,6 +249,7 @@ metric_to_slice = {"fa": slice(0, 24),
 seeds = np.array([484, 645, 714, 244, 215, 1503, 1334, 1576, 469, 1795])
 
 train_sizes = [100, 175, 350, 700, 1000, None]
+
 
 @pydra.mark.task
 def train_cnn_on_hyak(model, run, train_size=None, metric=None):
