@@ -303,8 +303,11 @@ if __name__ == "__main__":
                     run=run,
                     train_size=train_size,
                     cache_dir=cache_dir_tmp)
-
-                with pydra.Submitter(
-                    plugin="slurm",
-                    sbatch_args=sbatch_args) as sub:
-                        sub(runnable=task)
+                try:
+                    with pydra.Submitter(
+                        plugin="slurm",
+                        sbatch_args=sbatch_args) as sub:
+                            sub(runnable=task)
+                except Exception as e:
+                    print(e)
+                    continue
