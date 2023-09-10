@@ -298,16 +298,18 @@ if __name__ == "__main__":
     for model in list(model_dict.keys()):
         for run in range(10):
             for train_size in train_sizes:
-                task = train_cnn_on_hyak(
-                    model=model,
-                    run=run,
-                    train_size=train_size,
-                    cache_dir=cache_dir_tmp)
-                try:
-                    with pydra.Submitter(
-                        plugin="slurm",
-                        sbatch_args=sbatch_args) as sub:
-                            sub(runnable=task)
-                except Exception as e:
-                    print(e)
-                    continue
+                for metric in ["all", "fa", "md", "mk"]:
+                    task = train_cnn_on_hyak(
+                        model=model,
+                        run=run,
+                        metric=metric,
+                        train_size=train_size,
+                        cache_dir=cache_dir_tmp)
+                    try:
+                        with pydra.Submitter(
+                            plugin="slurm",
+                            sbatch_args=sbatch_args) as sub:
+                                sub(runnable=task)
+                    except Exception as e:
+                        print(e)
+                        continue
