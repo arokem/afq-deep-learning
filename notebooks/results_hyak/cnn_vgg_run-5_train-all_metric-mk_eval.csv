@@ -1,0 +1,4 @@
+,Model,Metric,Value,run
+0,cnn_vgg,mae,2.0861163116029173,5
+1,cnn_vgg,mad,1.6625572831420898,5
+2,cnn_vgg,r2,0.3929398134412012,5

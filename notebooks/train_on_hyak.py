@@ -259,7 +259,6 @@ def train_cnn_on_hyak(model, run, train_size=None, metric=None):
     os.makedirs(out_path, exist_ok=True)
     print(f"Output path is {out_path}")
 
-
     X, y, site = load_data()
     if metric is not None:
         X = X[:, :, metric_to_slice[metric]]
@@ -298,7 +297,7 @@ if __name__ == "__main__":
     for model in list(model_dict.keys()):
         for run in range(10):
             for train_size in train_sizes:
-                for metric in ["all", "fa", "md", "mk"]:
+                for metric in [None, "fa", "md", "mk"]:
                     task = train_cnn_on_hyak(
                         model=model,
                         run=run,

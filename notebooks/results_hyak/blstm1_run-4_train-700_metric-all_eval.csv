@@ -1,0 +1,4 @@
+,Model,Metric,Value,run
+0,blstm1,mae,1.675551288155608,4
+1,blstm1,mad,1.362209533935547,4
+2,blstm1,r2,0.5913051598158744,4
