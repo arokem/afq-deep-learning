@@ -1,0 +1,4 @@
+,Model,Metric,Value,run
+0,cnn_lenet,mae,2.451071105881659,2
+1,cnn_lenet,mad,2.0246028836059566,2
+2,cnn_lenet,r2,0.22105690236651154,2

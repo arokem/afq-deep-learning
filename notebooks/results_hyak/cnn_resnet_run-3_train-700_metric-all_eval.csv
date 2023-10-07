@@ -1,0 +1,4 @@
+,Model,Metric,Value,run
+0,cnn_resnet,mae,1.8493158530081442,3
+1,cnn_resnet,mad,1.4372369002838137,3
+2,cnn_resnet,r2,0.5286892682236028,3

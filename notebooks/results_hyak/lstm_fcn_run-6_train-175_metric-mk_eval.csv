@@ -1,0 +1,4 @@
+,Model,Metric,Value,run
+0,lstm_fcn,mae,2.5633180379808027,6
+1,lstm_fcn,mad,2.22276962324524,6
+2,lstm_fcn,r2,0.20160106084359408,6
