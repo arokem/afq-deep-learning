@@ -3,6 +3,9 @@ import os.path as op
 from tempfile import mkdtemp
 import glob
 from datetime import datetime
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LassoCV
+from afqinsight.pipeline import make_base_afq_pipeline
 
 import tensorflow as tf
 import numpy as np
@@ -26,6 +29,7 @@ import pickle
 
 AUG_SCALING = 1/10
 data_path = "/gscratch/escience/arokem/hbn/"
+
 
 def load_data_notf():
     afq_dataset = AFQDataset.from_files(
@@ -182,8 +186,6 @@ def fit_and_eval(model, model_dict, X, y, site, random_state, batch_size=32,
     return pd.DataFrame(result), pd.DataFrame(dict(y_pred=y_pred.squeeze(), y_test=y_test))
 
 
-
-
 def fit_and_eval_notf(model, X, y, site, random_state, train_size=None):
 
     X_train, X_test, y_train, y_test, site_train, site_test = train_test_split(
@@ -239,7 +241,8 @@ model_dict = {
   "blstm1": {"model": blstm1, "lr": 0.01},
   "blstm2": {"model": blstm1, "lr": 0.01},
   "lstm_fcn": {"model": lstm_fcn, "lr": 0.01},
-  "cnn_resnet": {"model": cnn_resnet, "lr": 0.01}
+  "cnn_resnet": {"model": cnn_resnet, "lr": 0.01},
+  "pclasso": {"model": None, "lr": None}
              }
 
 metric_to_slice = {"fa": slice(0, 24),
@@ -258,21 +261,46 @@ def train_cnn_on_hyak(model, run, train_size=None, metric=None):
     out_path = op.join("/gscratch/escience/arokem/afqdl-data/")
     os.makedirs(out_path, exist_ok=True)
     print(f"Output path is {out_path}")
-
-    X, y, site = load_data()
-    if metric is not None:
-        X = X[:, :, metric_to_slice[metric]]
-
     seed = seeds[run]
 
-    eval, pred = fit_and_eval(
-        model,
-        model_dict,
-        X,
-        y,
-        site,
-        random_state=seed,
-        train_size=train_size)
+    if model == "pclasso":
+        X, y, site = load_data_notf()
+        if metric is not None:
+            start = metric_to_slice[metric].start * 100
+            stop = metric_to_slice[metric].stop * 100
+            X = X[:, start:stop]
+
+        model = make_base_afq_pipeline(
+            feature_transformer=PCA,
+            scaler="standard",
+            estimator=LassoCV,
+            estimator_kwargs={
+                    "verbose": 0,
+                    "n_alphas": 50,
+                    "cv": 3,
+                    "n_jobs": 28,
+                    "max_iter": 500}
+                    )
+        eval, pred = fit_and_eval_notf(
+            model,
+            X,
+            y,
+            site,
+            random_state=seed,
+            train_size=train_size)
+    else:
+        X, y, site = load_data()
+        if metric is not None:
+            X = X[:, :, metric_to_slice[metric]]
+
+        eval, pred = fit_and_eval(
+            model,
+            model_dict,
+            X,
+            y,
+            site,
+            random_state=seed,
+            train_size=train_size)
 
     eval["run"] = run
     pred["run"] = run
