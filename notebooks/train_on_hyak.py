@@ -270,7 +270,7 @@ def train_cnn_on_hyak(model, run, train_size=None, metric=None):
             stop = metric_to_slice[metric].stop * 100
             X = X[:, start:stop]
 
-        model = make_base_afq_pipeline(
+        model_obj = make_base_afq_pipeline(
             feature_transformer=PCA,
             scaler="standard",
             estimator=LassoCV,
@@ -282,7 +282,7 @@ def train_cnn_on_hyak(model, run, train_size=None, metric=None):
                     "max_iter": 500}
                     )
         eval, pred = fit_and_eval_notf(
-            model,
+            model_obj,
             X,
             y,
             site,
@@ -315,8 +315,9 @@ def train_cnn_on_hyak(model, run, train_size=None, metric=None):
     pred.to_csv(f"{out_path}/{model}_run-{run}_train-{train_size}_metric-{metric}_pred.csv")
 
 sbatch_args = "-J afqdl -p gpu-a40 -A escience --mem=58G --time=18:00:00 -o /gscratch/scrubbed/arokem/logs/afqdl.out -e /gscratch/scrubbed/arokem/logs/afqdl.err --mail-user=arokem@uw.edu --mail-type=ALL --partition=gpu-a40 --gpus=1"
-if __name__ == "__main__":
 
+
+if __name__ == "__main__":
     scratch_dir = "/gscratch/scrubbed/arokem/"
     scratch_dir_tmp = op.join(scratch_dir, "tmp_")
     cache_dir_tmp = mkdtemp(prefix=scratch_dir_tmp)
