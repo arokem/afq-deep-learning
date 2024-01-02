@@ -232,16 +232,16 @@ def learning_curve(x, max_acc, min_acc, k):
 
 
 model_dict = {
-  "cnn_lenet": {"model": cnn_lenet, "lr": 0.001},
-  "mlp4": {"model": mlp4, "lr": 0.001},
-  "cnn_vgg": {"model": cnn_vgg, "lr": 0.001},
-  "lstm1v0": {"model": lstm1v0, "lr": 0.01},
-  "lstm1": {"model": lstm1, "lr": 0.01},
-  "lstm2": {"model": lstm2, "lr": 0.01},
-  "blstm1": {"model": blstm1, "lr": 0.01},
-  "blstm2": {"model": blstm1, "lr": 0.01},
-  "lstm_fcn": {"model": lstm_fcn, "lr": 0.01},
-  "cnn_resnet": {"model": cnn_resnet, "lr": 0.01},
+#   "cnn_lenet": {"model": cnn_lenet, "lr": 0.001},
+#   "mlp4": {"model": mlp4, "lr": 0.001},
+#   "cnn_vgg": {"model": cnn_vgg, "lr": 0.001},
+#   "lstm1v0": {"model": lstm1v0, "lr": 0.01},
+#   "lstm1": {"model": lstm1, "lr": 0.01},
+#   "lstm2": {"model": lstm2, "lr": 0.01},
+#   "blstm1": {"model": blstm1, "lr": 0.01},
+#   "blstm2": {"model": blstm1, "lr": 0.01},
+#   "lstm_fcn": {"model": lstm_fcn, "lr": 0.01},
+#   "cnn_resnet": {"model": cnn_resnet, "lr": 0.01},
   "pclasso": {"model": None, "lr": None}
              }
 
